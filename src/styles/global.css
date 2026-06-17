@@ -1,31 +1,18 @@
 :root {
-  /* Zed "One Light" palette — used in light mode */
-  --bg: #fafafa;
-  --surface: #eaeaeb;
-  --text: #383a42;
-  --text-muted: #8a8d96;
-  --border: #e0e0e2;
-  --accent: #4078f2;
-  --accent-hover: #2f6ae0;
+  --bg: #0f0f10;
+  --surface: #18181a;
+  --text: #b3b3b3;        /* body text — soft gray */
+  --heading: #ededec;     /* headings — near white */
+  --text-muted: #6f6f70;  /* dates, TOC, captions */
+  --border: #28282a;
+  --accent: #82a4f4;      /* links — soft blue */
+  --accent-hover: #9db9ff;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
   --max-width: 720px;
 
-  color-scheme: light dark;
-}
-
-/* When the visitor's system is in dark mode, swap to Zed "One Dark" */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #282c34;
-    --surface: #21252b;
-    --text: #c8ccd4;
-    --text-muted: #828997;
-    --border: #3b4048;
-    --accent: #61afef;
-    --accent-hover: #82c0ff;
-  }
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -34,21 +21,26 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-sans);
-  line-height: 1.65;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  color: var(--heading);
+  line-height: 1.25;
+  font-weight: 600;
 }
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); text-decoration: underline; }
 
-h1, h2, h3 { line-height: 1.25; }
-
 /* ---------- Rendered markdown ---------- */
-.prose { font-size: 1.05rem; }
-
-.prose h2 { font-size: 1.5rem; margin: 2.5rem 0 1rem; }
-.prose h3 { font-size: 1.25rem; margin: 2rem 0 0.75rem; }
+.prose { font-size: 1rem; }
+.prose h2 { font-size: 1.6rem; margin: 2.5rem 0 1rem; }
+.prose h3 { font-size: 1.3rem; margin: 2rem 0 0.75rem; }
 .prose p, .prose ul, .prose ol { margin: 1.1rem 0; }
 .prose li { margin: 0.35rem 0; }
 .prose a { text-decoration: underline; }
@@ -60,7 +52,6 @@ h1, h2, h3 { line-height: 1.25; }
   color: var(--text-muted);
 }
 
-/* inline `code` */
 .prose :not(pre) > code {
   background: var(--surface);
   padding: 0.15em 0.4em;
@@ -69,7 +60,6 @@ h1, h2, h3 { line-height: 1.25; }
   font-size: 0.9em;
 }
 
-/* code blocks */
 .prose pre {
   padding: 1rem 1.25rem;
   border-radius: 10px;
@@ -80,7 +70,6 @@ h1, h2, h3 { line-height: 1.25; }
 }
 .prose pre code { font-family: var(--font-mono); }
 
-/* images */
 .prose img {
   max-width: 100%;
   height: auto;
@@ -89,7 +78,6 @@ h1, h2, h3 { line-height: 1.25; }
   margin: 1.5rem 0;
 }
 
-/* tables */
 .prose table {
   width: 100%;
   border-collapse: collapse;
@@ -101,27 +89,13 @@ h1, h2, h3 { line-height: 1.25; }
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
-.prose th { background: var(--surface); }
+.prose th { background: var(--surface); color: var(--heading); }
 
 .prose hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
-/* Make code blocks use the DARK Zed colors when system is dark */
-@media (prefers-color-scheme: dark) {
-  .astro-code,
-  .astro-code span {
-    color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
-    font-style: var(--shiki-dark-font-style) !important;
-    font-weight: var(--shiki-dark-font-weight) !important;
-    text-decoration: var(--shiki-dark-text-decoration) !important;
-  }
-}
-
 /* ---------- Mobile ---------- */
 @media (max-width: 640px) {
-  .prose { font-size: 1rem; }
-  .prose h2 { font-size: 1.3rem; }
-
-  /* let wide tables scroll instead of overflowing the page */
+  .prose { font-size: 0.95rem; }
+  .prose h2 { font-size: 1.35rem; }
   .prose table { display: block; overflow-x: auto; white-space: nowrap; }
 }
