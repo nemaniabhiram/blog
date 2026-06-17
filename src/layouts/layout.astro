@@ -1,0 +1,76 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const siteName = "Nemani Abhiram"; // change to your name
+const { title, description = "Personal site of Nemani Abhiram" } = Astro.props;
+const pageTitle = title ? `${title} — ${siteName}` : siteName;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header class="wrap site-header">
+      <a href="/" class="site-name">{siteName}</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="wrap site-footer">
+      <span>© {new Date().getFullYear()} {siteName}</span>
+    </footer>
+
+    <style>
+      .wrap {
+        width: 100%;
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding-inline: 1.25rem;
+      }
+      .site-header {
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
+      }
+      .site-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .site-name:hover { text-decoration: none; }
+      nav { display: flex; gap: 1.25rem; }
+      nav a { color: var(--text-muted); }
+      nav a:hover { color: var(--accent); text-decoration: none; }
+      main { min-height: 60vh; padding-bottom: 4rem; }
+      .site-footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        border-top: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </body>
+</html>
