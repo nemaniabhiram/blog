@@ -116,3 +116,12 @@ h1, h2, h3 { line-height: 1.25; }
     text-decoration: var(--shiki-dark-text-decoration) !important;
   }
 }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .prose { font-size: 1rem; }
+  .prose h2 { font-size: 1.3rem; }
+
+  /* let wide tables scroll instead of overflowing the page */
+  .prose table { display: block; overflow-x: auto; white-space: nowrap; }
+}
