@@ -32,7 +32,9 @@ export default defineConfig({
           {
             behavior: "append",
             properties: { className: ["heading-anchor"], ariaHidden: "true", tabIndex: -1 },
-            content: { type: "text", value: "#" },
+            // Empty anchor; the visible "#" comes from CSS (.heading-anchor::after)
+            // so it doesn't leak into Astro's collected heading text (the TOC).
+            content: [],
           },
         ],
         [rehypeExternalLinks, { target: "_blank", rel: ["noopener", "noreferrer"] }],

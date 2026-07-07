@@ -122,21 +122,33 @@
       cancelAnimationFrame(raf);
     };
 
-    size();
-    if (reduced) {
-      // One static frame, no loop (E7)
-      last = performance.now();
-      frame(last + 1000);
-      cancelAnimationFrame(raf);
+    function begin() {
+      size();
+      if (reduced) {
+        // One static frame, no loop (E7). Font is ready here, so no tofu.
+        last = performance.now();
+        frame(last + 1000);
+        cancelAnimationFrame(raf);
+        return;
+      }
+      // Pause when off-screen (E8)
+      new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop())).observe(
+        canvas!,
+      );
+      document.addEventListener("visibilitychange", () =>
+        document.hidden ? stop() : start(),
+      );
     }
 
-    // Pause when off-screen (E8)
-    new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop())).observe(
-      canvas,
-    );
-    document.addEventListener("visibilitychange", () =>
-      document.hidden ? stop() : start(),
-    );
+    // Canvas fillText can't use a web font that hasn't loaded yet, and it does
+    // not auto-redraw when one arrives — so wait for Noto Sans Telugu before the
+    // first draw, or the glyphs render as tofu (critical for the single
+    // reduced-motion frame, which never redraws). (E2/E7, TRD §17)
+    const fontReady =
+      "fonts" in document
+        ? (document as Document).fonts.load("14px 'Noto Sans Telugu'").catch(() => {})
+        : Promise.resolve();
+    fontReady.then(begin);
 
     // Debounced re-init on resize (E9)
     let resizeId = 0;

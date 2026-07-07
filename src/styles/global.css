@@ -276,6 +276,10 @@ a {
   transition: opacity 0.15s ease;
 }
 
+.prose .heading-anchor::after {
+  content: "#";
+}
+
 .prose :is(h2, h3, h4, h5, h6):hover .heading-anchor,
 .prose .heading-anchor:focus-visible {
   opacity: 0.6;
