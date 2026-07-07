@@ -5,13 +5,14 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeUnwrapImages from "rehype-unwrap-images";
+import ogImages from "./src/integrations/og-images";
 
 // https://astro.build
 export default defineConfig({
   site: "https://nemaniabhiram.dev",
   output: "static",
   trailingSlash: "always",
-  integrations: [sitemap()],
+  integrations: [sitemap(), ogImages()],
   markdown: {
     // Dual-theme Shiki; backgrounds are overridden to the site palette in CSS.
     syntaxHighlight: "shiki",

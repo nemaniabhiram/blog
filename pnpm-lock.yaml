@@ -20,6 +20,12 @@ importers:
       '@fontsource-variable/newsreader':
         specifier: ^5.2.10
         version: 5.2.10
+      '@fontsource/jetbrains-mono':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/newsreader':
+        specifier: ^5.2.10
+        version: 5.2.10
       '@fontsource/noto-sans-telugu':
         specifier: ^5.2.8
         version: 5.2.8
@@ -433,6 +439,12 @@ packages:
 
   '@fontsource-variable/newsreader@5.2.10':
     resolution: {integrity: sha512-MdI2iRwrqWpMOU/2aV2BgfZ4dJNlj/XlYaY8Zb7t87mWqHskYW0XiUANkt1cyOCiEfW2VQ0bQ5vZgGPp6B2B4w==}
+
+  '@fontsource/jetbrains-mono@5.2.8':
+    resolution: {integrity: sha512-6w8/SG4kqvIMu7xd7wt6x3idn1Qux3p9N62s6G3rfldOUYHpWcc2FKrqf+Vo44jRvqWj2oAtTHrZXEP23oSKwQ==}
+
+  '@fontsource/newsreader@5.2.10':
+    resolution: {integrity: sha512-TFaYzoFhDqarUyV2yYjgZZEwT4bpaj6sGBnXSnFknQ/QB8/9LzfY6IO9+inHOX4zzPp87Z7/KuG1OI5gr91Q3A==}
 
   '@fontsource/noto-sans-telugu@5.2.8':
     resolution: {integrity: sha512-CGC8+bjR326wuIMBJZzVDrPISTw10EX0g5N3ngnEV3MX+sN5H/jkfBkVscRyhfUqGXlv8esaNultOakiO6GRpg==}
@@ -2505,6 +2517,10 @@ snapshots:
   '@fontsource-variable/jetbrains-mono@5.2.8': {}
 
   '@fontsource-variable/newsreader@5.2.10': {}
+
+  '@fontsource/jetbrains-mono@5.2.8': {}
+
+  '@fontsource/newsreader@5.2.10': {}
 
   '@fontsource/noto-sans-telugu@5.2.8': {}
 
