@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nemaniabhiram.dev/sitemap-index.xml
