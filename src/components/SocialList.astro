@@ -1,0 +1,93 @@
+---
+import { SOCIAL_LINKS } from "../data/constants";
+
+// Inline SVGs (Lucide, MIT) — no icon runtime dependency (TRD §9.3)
+const items = [
+  { key: "github", label: "GitHub", href: SOCIAL_LINKS.github, external: true },
+  { key: "twitter", label: "X", href: SOCIAL_LINKS.twitter, external: true },
+  { key: "linkedin", label: "LinkedIn", href: SOCIAL_LINKS.linkedin, external: true },
+  { key: "email", label: "Email", href: SOCIAL_LINKS.email, external: false },
+] as const;
+---
+
+<div class="social-list">
+  <span class="social-label">Find me on:</span>
+  <ul>
+    {items.map((item) => (
+      <li>
+        <a
+          href={item.href}
+          target={item.external ? "_blank" : undefined}
+          rel={item.external ? "me noopener" : undefined}
+        >
+          {item.key === "github" && (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+          )}
+          {item.key === "twitter" && (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"></path>
+            </svg>
+          )}
+          {item.key === "linkedin" && (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"></path>
+              <rect x="2" y="9" width="4" height="12"></rect>
+              <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+          )}
+          {item.key === "email" && (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="m22 7-10 6L2 7"></path>
+            </svg>
+          )}
+          <span>{item.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .social-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .social-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+  }
+
+  .social-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .social-list a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+    text-decoration: none;
+  }
+
+  .social-list a:hover {
+    color: var(--color-accent);
+  }
+</style>

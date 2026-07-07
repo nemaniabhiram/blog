@@ -1,0 +1,72 @@
+---
+import type { Post } from "../utils/posts";
+import { formatDate } from "../utils/date";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, publishDate } = post.data;
+const iso = publishDate.toISOString();
+---
+
+<li class="post-preview">
+  <div class="row">
+    <time class="date meta" datetime={iso}>{formatDate(publishDate)}</time>
+    <a class="title" href={`/posts/${post.id}/`}>{title}</a>
+  </div>
+  {description && <p class="description">{description}</p>}
+</li>
+
+<style>
+  .post-preview {
+    list-style: none;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .date {
+    flex-shrink: 0;
+  }
+
+  .title {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .title:hover {
+    color: var(--color-accent);
+  }
+
+  .description {
+    margin-top: var(--space-1);
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+  }
+
+  /* Desktop: date left in a fixed column, title to its right (TRD §9.4) */
+  @media (min-width: 640px) {
+    .row {
+      flex-direction: row;
+      align-items: baseline;
+      gap: var(--space-6);
+    }
+
+    .date {
+      width: 9.5rem;
+      text-align: left;
+    }
+
+    .description {
+      margin-left: calc(9.5rem + var(--space-6));
+      margin-top: 0;
+    }
+  }
+</style>

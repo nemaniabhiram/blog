@@ -1,0 +1,66 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  publishDate?: Date;
+  /** Post pages widen <main> to fit the TOC rail (TRD §8.4). */
+  wide?: boolean;
+}
+
+const { title, description, image, publishDate, wide = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      publishDate={publishDate}
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page">
+      <div class="shell">
+        <Header />
+      </div>
+      <main id="main" class={wide ? "is-post" : undefined}>
+        <slot />
+      </main>
+      <div class="shell">
+        <Footer />
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  .page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  /* Header and footer share the standard content column width */
+  .shell {
+    width: min(100% - 2.5rem, var(--content-width));
+    margin-inline: auto;
+  }
+</style>
+<script>
+  // Wrap prose tables so they can scroll horizontally on small screens (§10)
+  document.querySelectorAll(".prose table").forEach((table) => {
+    if (table.parentElement?.classList.contains("table-wrapper")) return;
+    const wrapper = document.createElement("div");
+    wrapper.className = "table-wrapper";
+    table.replaceWith(wrapper);
+    wrapper.appendChild(table);
+  });
+</script>

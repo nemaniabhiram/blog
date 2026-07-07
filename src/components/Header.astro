@@ -1,0 +1,194 @@
+---
+import { SITE, MENU_LINKS } from "../data/constants";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const pathname = Astro.url.pathname;
+const isActive = (path: string) =>
+  path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(path);
+---
+
+<header class="site-header">
+  <div class="brand">
+    <a href="/" class="brand-link" aria-label={`${SITE.title} — home`}>
+      <span class="monogram" aria-hidden="true">న</span>
+      <span class="brand-name">{SITE.title}</span>
+    </a>
+  </div>
+
+  <button
+    id="menu-toggle"
+    type="button"
+    class="menu-toggle"
+    aria-label="Menu"
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-controls="primary-nav"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+
+  <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+    <ul>
+      {MENU_LINKS.map((link) => (
+        <li>
+          <a href={link.path} aria-current={isActive(link.path) ? "page" : undefined}>
+            {link.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <div class="header-actions">
+    <ThemeToggle />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-top: var(--space-8);
+    margin-bottom: var(--space-28);
+  }
+
+  .brand {
+    margin-right: auto;
+  }
+
+  .brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .monogram {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-m);
+    background: var(--color-accent-soft);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-telugu);
+    font-size: 22px;
+    line-height: 1;
+    color: var(--color-accent);
+  }
+
+  .brand-name {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1.375rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .primary-nav ul {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .primary-nav a {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+    text-decoration: none;
+  }
+
+  .primary-nav a:hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .primary-nav a[aria-current="page"] {
+    color: var(--color-accent);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    color: var(--color-text-2);
+    cursor: pointer;
+  }
+
+  /* Mobile: collapse nav behind hamburger (TRD §9.1, §15) */
+  @media (max-width: 639px) {
+    .menu-toggle {
+      display: inline-flex;
+      order: 3;
+    }
+
+    .header-actions {
+      order: 2;
+    }
+
+    .primary-nav {
+      position: absolute;
+      top: calc(var(--space-8) + 44px);
+      right: 1.25rem;
+      z-index: 50;
+      display: none;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-l);
+      box-shadow: var(--shadow-raised);
+      padding: var(--space-3);
+    }
+
+    .site-header.menu-open .primary-nav {
+      display: block;
+    }
+
+    .primary-nav ul {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-1);
+    }
+
+    .primary-nav a {
+      display: block;
+      padding: var(--space-2) var(--space-4);
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector(".site-header");
+  const toggle = document.getElementById("menu-toggle");
+  toggle?.addEventListener("click", () => {
+    const open = header?.classList.toggle("menu-open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  // Close the menu when a link is chosen or focus leaves the header
+  header?.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest(".primary-nav a")) {
+      header.classList.remove("menu-open");
+      toggle?.setAttribute("aria-expanded", "false");
+    }
+  });
+</script>

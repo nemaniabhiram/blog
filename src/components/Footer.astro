@@ -1,0 +1,71 @@
+---
+import { SITE, MENU_LINKS } from "../data/constants";
+// NOTE: TeluguWave (the easter egg) mounts directly above the hairline in
+// Checkpoint 4 — this is a feature, not dead space (TRD §9.2, §11).
+import TeluguWave from "./TeluguWave.astro";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <TeluguWave />
+
+  <div class="footer-inner">
+    <div class="footer-row meta">
+      <span>© {year} {SITE.author}</span>
+      <nav aria-label="Footer">
+        {MENU_LINKS.map((link, i) => (
+          <>
+            {i > 0 && <span class="sep" aria-hidden="true">·</span>}
+            <a href={link.path}>{link.title}</a>
+          </>
+        ))}
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-16);
+  }
+
+  .footer-inner {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-6);
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .footer-row nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .footer-row a {
+    color: var(--color-text-2);
+    text-decoration: none;
+  }
+
+  .footer-row a:hover {
+    color: var(--color-accent);
+  }
+
+  .sep {
+    color: var(--color-text-3);
+  }
+
+  @media (max-width: 639px) {
+    .footer-row {
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+</style>
