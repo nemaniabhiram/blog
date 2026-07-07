@@ -4,8 +4,8 @@
    ========================================================================== */
 
 /* Self-hosted fonts (Fontsource) — no CDN requests (TRD §5.1) */
-@import "@fontsource-variable/newsreader";
-@import "@fontsource-variable/newsreader/wght-italic.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/inter/wght-italic.css";
 @import "@fontsource-variable/jetbrains-mono";
 @import "@fontsource/noto-sans-telugu/400.css";
 
@@ -16,7 +16,7 @@
   color-scheme: light;
 
   /* Fonts */
-  --font-serif: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
+  --font-display: "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-telugu: "Noto Sans Telugu", var(--font-mono);
 
@@ -230,10 +230,10 @@ a {
   margin-top: var(--space-4);
 }
 
-/* Headings (serif for h1–h3; mono for h4–h6) */
+/* Headings (Inter display for h1–h3; mono for h4–h6) */
 .prose h2,
 .prose h3 {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 600;
   line-height: 1.3;
   scroll-margin-top: 5rem;
@@ -324,12 +324,12 @@ a {
   padding-left: 1.25rem;
 }
 
-/* Blockquote — serif italic, accent bar (TRD §10) */
+/* Blockquote — display italic, accent bar (TRD §10) */
 .prose blockquote {
   border-left: 3px solid var(--color-accent);
   padding-left: var(--space-4);
   color: var(--color-text-2);
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-style: italic;
 }
 
@@ -462,10 +462,10 @@ a {
 }
 
 /* --------------------------------------------------------------------------
-   Reusable page headings (serif) — one <h1> per page (TRD §14)
+   Reusable page headings (Inter display) — one <h1> per page (TRD §14)
    -------------------------------------------------------------------------- */
 .section-heading {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.25rem;
   line-height: 1.3;
@@ -473,7 +473,7 @@ a {
 }
 
 .page-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.6rem, 4vw, 2rem);
   line-height: 1.2;

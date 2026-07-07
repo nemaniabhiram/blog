@@ -33,13 +33,26 @@
   const ctx = canvas?.getContext("2d");
   if (canvas && ctx) {
     const CELL_W = 16,
-      CELL_H = 22,
+      CELL_H = 18,
       FONT = "14px 'Noto Sans Telugu', monospace";
+    // Surf-silhouette tuning: a travelling water surface line with pointed
+    // crests and long troughs; glyphs fill the water below it (E4, reworked).
+    const SURF_BASE = 0.52, // baseline surface height (fraction from top)
+      SURF_AMP = 0.34, // crest rise above baseline
+      SURF_SHARP = 3, // crest pointiness (higher = sharper peaks, flatter troughs)
+      SURF_FREQ = 0.28, // crest spatial frequency (~2–3 crests across the column)
+      SURF_SPEED = 0.8, // crest travel speed (left → right)
+      SWELL_AMP = 0.08, // slow background swell that rolls the whole surface
+      SWELL_FREQ = 0.09,
+      SWELL_SPEED = 0.4,
+      SPRAY_BAND = 0.16, // how far above the surface spray dots reach (fraction)
+      CREST_BAND = 0.16; // water band just under the surface that shows letters
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let cols = 0,
       rows = 0,
       seeds: string[] = [],
+      seedRand: number[] = [],
       accent = "#C15F3C";
     let t = 0,
       last = 0,
@@ -72,6 +85,9 @@
         { length: cols * rows },
         () => ALPHABET[(Math.random() * ALPHABET.length) | 0],
       );
+      // Stable per-cell randomness so spray dots don't flicker frame-to-frame;
+      // the moving surface passes through this fixed field.
+      seedRand = Array.from({ length: cols * rows }, () => Math.random());
       readAccent();
     }
 
@@ -85,23 +101,46 @@
       ctx!.textBaseline = "middle";
       ctx!.textAlign = "center";
       const rippleGain = ripple.until > now ? (ripple.until - now) / 1500 : 0;
-      for (let y = 0; y < rows; y++) {
-        const depth = (y + 1) / rows; // lower rows denser (E4)
-        for (let x = 0; x < cols; x++) {
-          let v =
-            0.55 * Math.sin(x * 0.35 + t * 0.9) +
-            0.45 * Math.sin(x * 0.13 - t * 0.5 + y * 0.7);
-          v = (v + 1) / 2; // -> 0..1
-          v *= 0.35 + 0.65 * depth;
-          if (rippleGain > 0) {
-            const dx = x * CELL_W - ripple.x,
-              dy = y * CELL_H - ripple.y;
-            v += 0.6 * rippleGain * Math.exp(-(dx * dx + dy * dy) / 900); // (E10)
+      for (let x = 0; x < cols; x++) {
+        // Surface height for this column (fraction of height, 0 = top). The
+        // cubed half-sine gives narrow pointed crests over long flat troughs —
+        // a rolling surf profile — travelling left → right; a slow swell adds body.
+        const crest = Math.pow(
+          (1 + Math.sin(x * SURF_FREQ - t * SURF_SPEED)) / 2,
+          SURF_SHARP,
+        );
+        const swell = Math.sin(x * SWELL_FREQ + t * SWELL_SPEED);
+        const surf = SURF_BASE - SURF_AMP * crest - SWELL_AMP * swell;
+
+        for (let y = 0; y < rows; y++) {
+          const i = y * cols + x;
+          const fy = (y + 0.5) / rows;
+          const d = fy - surf; // depth below the surface line (negative = air)
+          let v: number;
+          let ch: string;
+
+          if (d < -SPRAY_BAND) {
+            continue; // air, well above the surface
+          } else if (d < 0) {
+            // Spray just above the surface — sparse dots, denser over crests
+            if (seedRand[i] >= 0.12 + 0.5 * crest) continue;
+            v = 0.16 + 0.14 * crest;
+            ch = "·";
+          } else {
+            // Water: brighter/denser with depth (E4)
+            v = 0.28 + d * 1.7;
+            if (rippleGain > 0) {
+              const dx = x * CELL_W - ripple.x,
+                dy = y * CELL_H - ripple.y;
+              v += 0.6 * rippleGain * Math.exp(-(dx * dx + dy * dy) / 900); // (E10)
+            }
+            v = Math.min(1, Math.max(0, v));
+            if (v < 0.12) continue;
+            // The crest face (top band of water) and bright cells carry real
+            // Telugu letters — the "foam" of words riding the wave (E3).
+            ch = d < CREST_BAND || v > 0.82 ? seeds[i] : RAMP[(v * (RAMP.length - 1)) | 0];
           }
-          v = Math.min(1, Math.max(0, v));
-          if (v < 0.12) continue;
-          const ch =
-            v > 0.82 ? seeds[y * cols + x] : RAMP[(v * (RAMP.length - 1)) | 0]; // (E3)
+
           ctx!.globalAlpha = v * 0.85 + 0.05; // (E5)
           ctx!.fillStyle = accent;
           ctx!.fillText(ch, x * CELL_W + CELL_W / 2, y * CELL_H + CELL_H / 2);

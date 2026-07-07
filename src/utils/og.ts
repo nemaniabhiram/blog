@@ -13,8 +13,8 @@ const load = (pkg: string) => readFileSync(require.resolve(pkg));
 
 const fonts = [
   {
-    name: "Newsreader",
-    data: load("@fontsource/newsreader/files/newsreader-latin-600-normal.woff"),
+    name: "Inter",
+    data: load("@fontsource/inter/files/inter-latin-600-normal.woff"),
     weight: 600 as const,
     style: "normal" as const,
   },
@@ -47,7 +47,7 @@ export async function renderOgImage({ title, date }: OgOptions): Promise<Buffer>
     <div style="display:flex;flex-direction:column;width:1200px;height:630px;background:#FAF9F5;font-family:'JetBrains Mono';">
       <div style="display:flex;width:1200px;height:10px;background:#C15F3C;"></div>
       <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between;padding:64px;">
-        <div style="display:flex;font-family:'Newsreader';font-weight:600;font-size:64px;line-height:1.15;color:#1F1D1A;max-width:1072px;">
+        <div style="display:flex;font-family:'Inter';font-weight:600;font-size:64px;line-height:1.15;color:#1F1D1A;max-width:1072px;">
           ${title}
         </div>
         <div style="display:flex;align-items:flex-end;justify-content:space-between;">

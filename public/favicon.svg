@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <text x="16" y="17" font-family="'Noto Sans Telugu', sans-serif" font-size="26"
-        text-anchor="middle" dominant-baseline="central" fill="#C15F3C">న</text>
+  <text x="16" y="17" font-family="ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace"
+        font-size="24" font-weight="700" text-anchor="middle" dominant-baseline="central"
+        fill="#C15F3C">#</text>
 </svg>

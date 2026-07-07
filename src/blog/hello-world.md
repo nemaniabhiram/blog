@@ -21,8 +21,8 @@ keyboard hint: press <kbd>Ctrl</kbd> + <kbd>K</kbd>.
 
 ### A third-level heading
 
-> A blockquote, set in serif italic as a deliberate contrast against the
-> mono body. It should feel quiet but distinct.
+> A blockquote, set in italic as a deliberate contrast against the mono
+> body. It should feel quiet but distinct.
 
 #### A fourth-level heading
 

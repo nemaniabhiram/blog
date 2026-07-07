@@ -9,7 +9,7 @@ fully static, no database, no server runtime.
 - Markdown posts in `src/blog/` — `git push` to `master` publishes.
 - Warm, claude.ai-adjacent palette (cream light / charcoal dark, clay accent),
   class-based dark mode with a no-flash theme toggle.
-- Mono-first UI (JetBrains Mono) with a serif for display (Newsreader).
+- Mono-first UI (JetBrains Mono) with Inter for display headings.
 - Post pages with a sticky, scroll-spied table of contents and per-post Open
   Graph images.
 - A signature easter egg: an animated ASCII wave rendered in **Telugu letters**
@@ -42,5 +42,5 @@ Cloudflare Pages (free tier): build command `pnpm build`, output `dist`,
 
 ## License
 
-Source © Nemani Abhiram. Fonts are OFL (Newsreader, JetBrains Mono, Noto Sans
+Source © Nemani Abhiram. Fonts are OFL (Inter, JetBrains Mono, Noto Sans
 Telugu, via Fontsource).
