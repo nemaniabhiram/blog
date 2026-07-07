@@ -1,0 +1,128 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+// Only depths 2–4 (TRD §9.5)
+const items = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+---
+
+{items.length > 0 && (
+  <aside class="toc" aria-label="Table of contents">
+    <p class="toc-title">Table of contents</p>
+    <ul>
+      {items.map((h) => (
+        <li class:list={[`depth-${h.depth}`]}>
+          <a href={`#${h.slug}`} data-toc-link={h.slug}>
+            <span class="hash" aria-hidden="true">{"#".repeat(h.depth)}</span>
+            {h.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}
+
+<style>
+  .toc {
+    position: sticky;
+    top: 5rem;
+    align-self: start;
+    font-family: var(--font-mono);
+  }
+
+  .toc-title {
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--color-text-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .toc a {
+    display: inline-flex;
+    gap: 0.4em;
+    font-size: 0.8125rem;
+    color: var(--color-text-3);
+    text-decoration: none;
+    line-height: 1.4;
+  }
+
+  .toc a:hover {
+    color: var(--color-text);
+  }
+
+  .toc a.active {
+    color: var(--color-accent);
+  }
+
+  .toc .hash {
+    color: var(--color-text-3);
+    flex-shrink: 0;
+  }
+
+  .toc .depth-3 {
+    padding-left: 0.75rem;
+  }
+
+  .toc .depth-3 a,
+  .toc .depth-4 a {
+    font-size: 0.75rem;
+  }
+
+  .toc .depth-4 {
+    padding-left: 1.5rem;
+  }
+
+  /* Only shown on the lg TOC rail (≥1024px) — hidden otherwise (TRD §9.5) */
+  @media (max-width: 1023px) {
+    .toc {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Scroll-spy: mark the currently visible section's link (TRD §9.5)
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]").forEach((a) => {
+    links.set(a.dataset.tocLink!, a);
+  });
+
+  if (links.size) {
+    const headings = [...links.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    let active = "";
+    const setActive = (id: string) => {
+      if (id === active) return;
+      if (active) links.get(active)?.classList.remove("active");
+      links.get(id)?.classList.add("active");
+      active = id;
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-10% 0px -70% 0px", threshold: 0 },
+    );
+
+    headings.forEach((h) => observer.observe(h));
+  }
+</script>

@@ -11,7 +11,7 @@ const posts = (await getAllPosts()).slice(0, 50);
 
 <Base title={SITE.title}>
   <section aria-label="Blog post list">
-    <h2 class="section-heading">Posts</h2>
+    <h1 class="section-heading">Posts</h1>
     <ul class="post-list">
       {posts.map((post) => <PostPreview post={post} />)}
     </ul>
@@ -23,21 +23,6 @@ const posts = (await getAllPosts()).slice(0, 50);
 </Base>
 
 <style>
-  .section-heading {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    font-size: 1.25rem;
-    margin-bottom: var(--space-6);
-  }
-
-  .post-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    padding: 0;
-    margin: 0;
-  }
-
   .socials {
     margin-top: var(--space-16);
   }

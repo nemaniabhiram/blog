@@ -1,0 +1,166 @@
+---
+import type { MarkdownHeading } from "astro";
+import { Image } from "astro:assets";
+import Base from "./Base.astro";
+import Toc from "../components/Toc.astro";
+import BackToTop from "../components/BackToTop.astro";
+import type { Post } from "../utils/posts";
+import { formatDate } from "../utils/date";
+
+interface Props {
+  post: Post;
+  headings: MarkdownHeading[];
+}
+
+const { post, headings } = Astro.props;
+const { title, description, publishDate, coverImage, tags, ogImage } = post.data;
+const iso = publishDate.toISOString();
+const ogImageUrl = ogImage ?? `/og-image/${post.id}.png`;
+---
+
+<Base title={title} description={description} publishDate={publishDate} image={ogImageUrl} wide>
+  <div class="post-grid">
+    <div class="post-main">
+      <header id="blog-hero" class="hero">
+        {coverImage && (
+          <Image class="cover" src={coverImage.src} alt={coverImage.alt} widths={[672, 1344]} />
+        )}
+        <h1>{title}</h1>
+        <div class="hero-meta meta">
+          <time datetime={iso}>{formatDate(publishDate)}</time>
+          {tags.length > 0 && (
+            <ul class="tag-pills">
+              {tags.map((tag) => (
+                <li>
+                  <a class="tag-pill" href={`/tags/${tag}/`}>#{tag}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </header>
+
+      <article class="prose">
+        <slot />
+      </article>
+
+      <footer class="post-footer">
+        <hr />
+        {tags.length > 0 && (
+          <div class="posted-in meta">
+            <span>Posted in:</span>
+            <ul class="tag-pills">
+              {tags.map((tag) => (
+                <li>
+                  <a class="tag-pill" href={`/tags/${tag}/`}>#{tag}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <a class="back-link" href="/posts/">← Back to posts</a>
+      </footer>
+    </div>
+
+    <Toc headings={headings} />
+  </div>
+
+  <BackToTop />
+</Base>
+
+<style>
+  /* Centered grid: article stays aligned with the (content-width) header;
+     the TOC lives in the right gutter (TRD §8.4, geometry keeps them aligned) */
+  .post-grid {
+    display: grid;
+    grid-template-columns: 1fr min(100%, var(--content-width)) 1fr;
+    align-items: start;
+    column-gap: var(--space-8);
+  }
+
+  .post-main {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .post-grid > :global(.toc) {
+    grid-column: 3;
+    justify-self: start;
+  }
+
+  .hero {
+    margin-bottom: var(--space-8);
+  }
+
+  .cover {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-l);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .tag-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+    padding: 0.1em 0.5em;
+    border-radius: var(--radius-s);
+    text-decoration: none;
+  }
+
+  .tag-pill:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .post-footer {
+    margin-top: var(--space-12);
+  }
+
+  .posted-in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

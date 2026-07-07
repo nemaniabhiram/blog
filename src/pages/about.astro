@@ -1,0 +1,18 @@
+---
+import Base from "../layouts/Base.astro";
+import { SOCIAL_LINKS } from "../data/constants";
+---
+
+<Base title="About">
+  <h1 class="page-title">About</h1>
+  <div class="prose">
+    <p>Hi, I'm Nemani Abhiram.</p>
+    <p>{"{{TODO:about-bio — 2–4 short paragraphs: who you are, what you work on, where to find you}}"}</p>
+    <p>
+      You can find me on
+      <a href={SOCIAL_LINKS.github} target="_blank" rel="me noopener">GitHub</a>,
+      <a href={SOCIAL_LINKS.twitter} target="_blank" rel="me noopener">X</a>, or
+      <a href={SOCIAL_LINKS.email}>email me</a>.
+    </p>
+  </div>
+</Base>

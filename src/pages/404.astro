@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="404">
+  <section class="notfound">
+    <h1>404</h1>
+    <p>This page has wandered off.</p>
+    <a class="home-link" href="/">← Back home</a>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    text-align: center;
+    padding-block: var(--space-16);
+  }
+
+  .notfound h1 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(4rem, 12vw, 7rem);
+    line-height: 1;
+    color: var(--color-accent);
+  }
+
+  .notfound p {
+    margin-top: var(--space-4);
+    color: var(--color-text-2);
+  }
+
+  .home-link {
+    display: inline-block;
+    margin-top: var(--space-6);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .home-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

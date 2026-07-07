@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import Base from "../../layouts/Base.astro";
+import PostPreview from "../../components/PostPreview.astro";
+import Paginator from "../../components/Paginator.astro";
+import { getAllPosts, type Post } from "../../utils/posts";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getAllPosts();
+  return paginate(posts, { pageSize: 10 });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<Post>;
+}
+
+const { page } = Astro.props;
+---
+
+<Base title="Posts">
+  <div class="index-head">
+    <h1 class="section-heading">Posts</h1>
+    <a class="all-tags" href="/tags/">View all tags →</a>
+  </div>
+
+  <ul class="post-list">
+    {page.data.map((post) => <PostPreview post={post} />)}
+  </ul>
+
+  <Paginator
+    prevUrl={page.url.prev}
+    nextUrl={page.url.next}
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+  />
+</Base>
+
+<style>
+  .index-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .index-head .section-heading {
+    margin-bottom: var(--space-6);
+  }
+
+  .all-tags {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .all-tags:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import Base from "../../../layouts/Base.astro";
+import PostPreview from "../../../components/PostPreview.astro";
+import Paginator from "../../../components/Paginator.astro";
+import { getAllPosts, uniqueTags, type Post } from "../../../utils/posts";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getAllPosts();
+  const tags = uniqueTags(posts);
+  return tags.flatMap((tag) => {
+    const filtered = posts.filter((post) => post.data.tags.includes(tag));
+    return paginate(filtered, { params: { tag }, pageSize: 10 });
+  });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<Post>;
+}
+
+const { page } = Astro.props;
+const { tag } = Astro.params;
+---
+
+<Base title={`Tags · #${tag}`} description={`Posts tagged #${tag}.`}>
+  <h1 class="section-heading">
+    Tags <span class="tag-name">#{tag}</span>
+  </h1>
+  <a class="all-tags" href="/tags/">← All tags</a>
+
+  <ul class="post-list">
+    {page.data.map((post) => <PostPreview post={post} />)}
+  </ul>
+
+  <Paginator
+    prevUrl={page.url.prev}
+    nextUrl={page.url.next}
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+  />
+</Base>
+
+<style>
+  .tag-name {
+    color: var(--color-accent);
+  }
+
+  .all-tags {
+    display: inline-block;
+    margin-bottom: var(--space-8);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .all-tags:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .section-heading {
+    margin-bottom: var(--space-3);
+  }
+</style>
