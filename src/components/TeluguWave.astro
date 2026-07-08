@@ -27,39 +27,41 @@
 </style>
 
 <script>
-  import { RAMP, ALPHABET } from "../data/telugu";
+  import { ALPHABET } from "../data/telugu";
 
   const canvas = document.getElementById("telugu-wave") as HTMLCanvasElement | null;
   const ctx = canvas?.getContext("2d");
   if (canvas && ctx) {
     const CELL_W = 16,
       CELL_H = 18,
-      FPS = 24, // positional motion needs more frames than the old 12 (E6)
+      FPS = 24, // smooth positional motion (E6)
       FONT = "14px 'Noto Sans Telugu', monospace";
-    // Rolling-water tuning. The surface is a smooth travelling line (two
-    // interfering sines + a slow swell); glyphs are *anchored* to it with
-    // sub-pixel positioning, so the whole letter-mass rises and falls smoothly
-    // as crests roll left→right — no grid snapping / popping. (E4, reworked v3)
-    const SURF_BASE = 0.42, // mean water level (fraction of height, 0 = top)
-      SURF_AMP = 0.15, // crest amplitude
-      SURF_FREQ = 0.2, // primary crest frequency (columns)
-      SURF_SPEED = 1.1, // primary crest travel speed (left → right)
-      SURF_FREQ2 = 0.31, // secondary wave (interference → organic crests)
-      SURF_SPEED2 = 0.7,
-      SWELL_AMP = 0.05, // slow bulk swell that rolls the whole surface
-      SWELL_FREQ = 0.07,
-      SWELL_SPEED = 0.35,
-      DRIFT = 2.4, // horizontal current: columns/sec the letter field flows →
-      SPRAY_ROWS = 2; // rows of spray dots above the crest
-    // Pointer ripple lifts the surface toward the cursor (E10)
+    // v4 — glyph ribbons on ONE dominant travelling Stokes wave. The wave is a
+    // thick ribbon of letters tracing a sharp-crested / flat-troughed curve over
+    // mostly open space, with faint echo ribbons behind it (parallax). The curve
+    // *is* the wave — a filled mass just reads as terrain. (E4, reworked v4)
+    const WAVE_BASE = 0.42, // mean line height (fraction of canvas H, 0 = top)
+      WAVE_AMP = 0.32, // amplitude (fraction of H) — large, uses most of the strip
+      WAVE_K = 0.17, // angular frequency per column → ~1.1 waves across (one big wave)
+      WAVE_SPEED = 1.4, // crest travel speed (left → right)
+      RIBBON = 3, // primary ribbon thickness (glyph on the curve + 2 below)
+      DRIFT = 3; // columns/sec the letters ride along the wave →
+    // Echo ribbons behind the primary (depth / parallax).
+    const ECHOES = [
+      { amp: 0.62, phase: 2.1, speed: 0.8, alpha: 0.32, off: 11 },
+      { amp: 0.42, phase: 4.2, speed: 0.62, alpha: 0.18, off: 22 },
+    ];
+    const SEED_ROWS = RIBBON + ECHOES.length;
+    // Pointer ripple lifts the primary crest toward the cursor (E10)
     const RIPPLE_MS = 1500,
-      RIPPLE_LIFT = 0.2, // fraction of height the water bulges up
+      RIPPLE_LIFT = 0.18, // fraction of height the water bulges up
       RIPPLE_SIGMA = 2600; // px² spread of the bulge
+    // Sharp-crested Stokes profile: cos + a 2nd harmonic sharpens crests and
+    // flattens troughs. Returns ~ +1 (crest) … −0.54 (trough).
+    const stokes = (th: number) => (Math.cos(th) + 0.3 * Math.cos(2 * th)) / 1.3;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let cols = 0,
-      rows = 0,
-      bands = 0,
       seeds: string[] = [],
       seedRand: number[] = [],
       accent = "#C15F3C";
@@ -89,14 +91,13 @@
       canvas!.height = h * dpr;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.ceil(w / CELL_W);
-      rows = Math.ceil(h / CELL_H);
-      bands = rows + 3; // depth rows in the anchored stack (a little headroom)
+      // One drifting strip of letters per ribbon row (primary rows + echoes).
       seeds = Array.from(
-        { length: cols * bands },
+        { length: cols * SEED_ROWS },
         () => ALPHABET[(Math.random() * ALPHABET.length) | 0],
       );
       // Stable per-column randomness so spray dots don't flicker frame-to-frame.
-      seedRand = Array.from({ length: cols * bands }, () => Math.random());
+      seedRand = Array.from({ length: cols }, () => Math.random());
       readAccent();
     }
 
@@ -114,52 +115,51 @@
       ctx!.fillStyle = accent;
 
       const rippleGain = ripple.until > now ? (ripple.until - now) / RIPPLE_MS : 0;
-      const drift = Math.floor(t * DRIFT); // horizontal current (whole columns)
+      const scroll = Math.round(t * DRIFT); // letters ride the wave → (whole cols)
 
+      // Echo ribbons first (behind): thin single-glyph lines at reduced
+      // amplitude, phase and speed for parallax depth.
+      for (let e = 0; e < ECHOES.length; e++) {
+        const ec = ECHOES[e];
+        const phase = t * WAVE_SPEED * ec.speed + ec.phase;
+        ctx!.globalAlpha = ec.alpha;
+        for (let x = 0; x < cols; x++) {
+          const y = (WAVE_BASE - WAVE_AMP * ec.amp * stokes(x * WAVE_K - phase)) * H + ec.off;
+          if (y < -CELL_H || y > H + CELL_H) continue;
+          const wc = (((x - scroll) % cols) + cols) % cols;
+          ctx!.fillText(seeds[(RIBBON + e) * cols + wc], x * CELL_W + CELL_W / 2, y);
+        }
+      }
+
+      // Primary ribbon (front): a thick band of letters on the dominant wave.
       for (let x = 0; x < cols; x++) {
         const cx = x * CELL_W + CELL_W / 2;
-
-        // Smooth travelling surface, in px. Two interfering sines make the
-        // crests organic; a slow swell rolls the whole line.
-        const s1 = Math.sin(x * SURF_FREQ - t * SURF_SPEED);
-        const s2 = Math.sin(x * SURF_FREQ2 + t * SURF_SPEED2 + 1.7);
-        const swell = Math.sin(x * SWELL_FREQ + t * SWELL_SPEED);
-        let surfF = SURF_BASE - SURF_AMP * (0.6 * s1 + 0.4 * s2) - SWELL_AMP * swell;
+        const s = stokes(x * WAVE_K - t * WAVE_SPEED);
+        let yFrac = WAVE_BASE - WAVE_AMP * s;
         if (rippleGain > 0) {
-          const dx = cx - ripple.x; // pointer lifts the water toward the cursor
-          surfF -= RIPPLE_LIFT * rippleGain * Math.exp(-(dx * dx) / RIPPLE_SIGMA);
+          const dx = cx - ripple.x; // pointer lifts the crest toward the cursor
+          yFrac -= RIPPLE_LIFT * rippleGain * Math.exp(-(dx * dx) / RIPPLE_SIGMA);
         }
-        const surfPx = surfF * H;
+        const y0 = yFrac * H;
+        const crestness = (s + 0.538) / 1.538; // 0 at trough → 1 at crest
+        const wc = (((x - scroll) % cols) + cols) % cols;
 
-        // Column of stable randomness for spray/among cells, scrolled by current.
-        const src = (((x - drift) % cols) + cols) % cols;
-
-        // Spray dots riding above the crest.
-        for (let s = 1; s <= SPRAY_ROWS; s++) {
-          const sy = surfPx - s * CELL_H * 0.85;
-          if (sy < -CELL_H) break;
-          if (seedRand[s * cols + src] < 0.5 - s * 0.16) {
-            ctx!.globalAlpha = 0.2 - s * 0.06;
+        // Spray riding off the sharp crests.
+        if (crestness > 0.72 && seedRand[wc] < 0.5) {
+          const sy = y0 - CELL_H * 0.9;
+          if (sy > -CELL_H) {
+            ctx!.globalAlpha = 0.22;
             ctx!.fillText("·", cx, sy);
           }
         }
 
-        // Water body: glyphs anchored to the surface, stacked to the bottom.
-        // Sub-pixel `py` → the mass slides smoothly as the surface bobs; letters
-        // ride the wave (identity keyed by depth band + drift, so they don't
-        // churn while bobbing) and flow sideways with the current.
-        let k = 0;
-        for (let py = surfPx; py < H + CELL_H * 0.5; py += CELL_H, k++) {
-          const df = (py - surfPx) / Math.max(1, H - surfPx); // 0 surface → 1 floor
-          let v = k === 0 ? 0.92 : 0.35 + 0.62 * df; // crest foam brightest
-          v = Math.min(1, Math.max(0, v));
-          if (v < 0.1) continue;
-          const seedIdx = ((k % bands) + bands) % bands * cols + src;
-          // Bright cells (crest + deep water) carry real Telugu letters; the
-          // shallow fade uses the density ramp (E3).
-          const ch = v > 0.78 ? seeds[seedIdx] : RAMP[(v * (RAMP.length - 1)) | 0];
-          ctx!.globalAlpha = v * 0.85 + 0.05; // (E5)
-          ctx!.fillText(ch, cx, py);
+        for (let r = 0; r < RIBBON; r++) {
+          const py = y0 + r * CELL_H;
+          if (py > H + CELL_H) break;
+          if (py < -CELL_H) continue;
+          const rowA = r === 0 ? 1 : r === 1 ? 0.5 : 0.26; // fade downward
+          ctx!.globalAlpha = rowA * (0.55 + 0.45 * crestness); // crest brighter
+          ctx!.fillText(seeds[r * cols + wc], cx, py);
         }
       }
       ctx!.globalAlpha = 1;
