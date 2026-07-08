@@ -40,6 +40,11 @@ An ordered list:
 2. Step two
 3. Step three
 
+A task list, with some ~~struck-through~~ text and a footnote.[^1]
+
+- [x] Done item
+- [ ] Pending item
+
 A table:
 
 | Feature      | Supported | Notes                    |
@@ -68,3 +73,5 @@ _A decorative caption, styled small and muted._
 ---
 
 That horizontal rule marks the end of the feature demo.
+
+[^1]: And this is the footnote — small, muted, and linked back to its marker.

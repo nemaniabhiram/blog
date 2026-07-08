@@ -6,8 +6,10 @@ interface Props {
 }
 
 const { headings } = Astro.props;
-// Only depths 2–4 (TRD §9.5)
-const items = headings.filter((h) => h.depth >= 2 && h.depth <= 4);
+// Only depths 2–4; exclude the auto-generated footnotes label (TRD §9.5)
+const items = headings.filter(
+  (h) => h.depth >= 2 && h.depth <= 4 && h.slug !== "footnote-label",
+);
 ---
 
 {items.length > 0 && (

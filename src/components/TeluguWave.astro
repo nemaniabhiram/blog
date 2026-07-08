@@ -34,23 +34,32 @@
   if (canvas && ctx) {
     const CELL_W = 16,
       CELL_H = 18,
+      FPS = 24, // positional motion needs more frames than the old 12 (E6)
       FONT = "14px 'Noto Sans Telugu', monospace";
-    // Surf-silhouette tuning: a travelling water surface line with pointed
-    // crests and long troughs; glyphs fill the water below it (E4, reworked).
-    const SURF_BASE = 0.52, // baseline surface height (fraction from top)
-      SURF_AMP = 0.34, // crest rise above baseline
-      SURF_SHARP = 3, // crest pointiness (higher = sharper peaks, flatter troughs)
-      SURF_FREQ = 0.28, // crest spatial frequency (~2–3 crests across the column)
-      SURF_SPEED = 0.8, // crest travel speed (left → right)
-      SWELL_AMP = 0.08, // slow background swell that rolls the whole surface
-      SWELL_FREQ = 0.09,
-      SWELL_SPEED = 0.4,
-      SPRAY_BAND = 0.16, // how far above the surface spray dots reach (fraction)
-      CREST_BAND = 0.16; // water band just under the surface that shows letters
+    // Rolling-water tuning. The surface is a smooth travelling line (two
+    // interfering sines + a slow swell); glyphs are *anchored* to it with
+    // sub-pixel positioning, so the whole letter-mass rises and falls smoothly
+    // as crests roll left→right — no grid snapping / popping. (E4, reworked v3)
+    const SURF_BASE = 0.42, // mean water level (fraction of height, 0 = top)
+      SURF_AMP = 0.15, // crest amplitude
+      SURF_FREQ = 0.2, // primary crest frequency (columns)
+      SURF_SPEED = 1.1, // primary crest travel speed (left → right)
+      SURF_FREQ2 = 0.31, // secondary wave (interference → organic crests)
+      SURF_SPEED2 = 0.7,
+      SWELL_AMP = 0.05, // slow bulk swell that rolls the whole surface
+      SWELL_FREQ = 0.07,
+      SWELL_SPEED = 0.35,
+      DRIFT = 2.4, // horizontal current: columns/sec the letter field flows →
+      SPRAY_ROWS = 2; // rows of spray dots above the crest
+    // Pointer ripple lifts the surface toward the cursor (E10)
+    const RIPPLE_MS = 1500,
+      RIPPLE_LIFT = 0.2, // fraction of height the water bulges up
+      RIPPLE_SIGMA = 2600; // px² spread of the bulge
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let cols = 0,
       rows = 0,
+      bands = 0,
       seeds: string[] = [],
       seedRand: number[] = [],
       accent = "#C15F3C";
@@ -81,69 +90,76 @@
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.ceil(w / CELL_W);
       rows = Math.ceil(h / CELL_H);
+      bands = rows + 3; // depth rows in the anchored stack (a little headroom)
       seeds = Array.from(
-        { length: cols * rows },
+        { length: cols * bands },
         () => ALPHABET[(Math.random() * ALPHABET.length) | 0],
       );
-      // Stable per-cell randomness so spray dots don't flicker frame-to-frame;
-      // the moving surface passes through this fixed field.
-      seedRand = Array.from({ length: cols * rows }, () => Math.random());
+      // Stable per-column randomness so spray dots don't flicker frame-to-frame.
+      seedRand = Array.from({ length: cols * bands }, () => Math.random());
       readAccent();
     }
 
     function frame(now: number) {
       raf = requestAnimationFrame(frame);
-      if (now - last < 1000 / 12) return; // 12 fps throttle (E6)
+      if (now - last < 1000 / FPS) return; // fps throttle (E6)
       t += (now - last) / 1000;
       last = now;
-      ctx!.clearRect(0, 0, canvas!.clientWidth, canvas!.clientHeight);
+      const W = canvas!.clientWidth,
+        H = canvas!.clientHeight;
+      ctx!.clearRect(0, 0, W, H);
       ctx!.font = FONT;
       ctx!.textBaseline = "middle";
       ctx!.textAlign = "center";
-      const rippleGain = ripple.until > now ? (ripple.until - now) / 1500 : 0;
+      ctx!.fillStyle = accent;
+
+      const rippleGain = ripple.until > now ? (ripple.until - now) / RIPPLE_MS : 0;
+      const drift = Math.floor(t * DRIFT); // horizontal current (whole columns)
+
       for (let x = 0; x < cols; x++) {
-        // Surface height for this column (fraction of height, 0 = top). The
-        // cubed half-sine gives narrow pointed crests over long flat troughs —
-        // a rolling surf profile — travelling left → right; a slow swell adds body.
-        const crest = Math.pow(
-          (1 + Math.sin(x * SURF_FREQ - t * SURF_SPEED)) / 2,
-          SURF_SHARP,
-        );
+        const cx = x * CELL_W + CELL_W / 2;
+
+        // Smooth travelling surface, in px. Two interfering sines make the
+        // crests organic; a slow swell rolls the whole line.
+        const s1 = Math.sin(x * SURF_FREQ - t * SURF_SPEED);
+        const s2 = Math.sin(x * SURF_FREQ2 + t * SURF_SPEED2 + 1.7);
         const swell = Math.sin(x * SWELL_FREQ + t * SWELL_SPEED);
-        const surf = SURF_BASE - SURF_AMP * crest - SWELL_AMP * swell;
+        let surfF = SURF_BASE - SURF_AMP * (0.6 * s1 + 0.4 * s2) - SWELL_AMP * swell;
+        if (rippleGain > 0) {
+          const dx = cx - ripple.x; // pointer lifts the water toward the cursor
+          surfF -= RIPPLE_LIFT * rippleGain * Math.exp(-(dx * dx) / RIPPLE_SIGMA);
+        }
+        const surfPx = surfF * H;
 
-        for (let y = 0; y < rows; y++) {
-          const i = y * cols + x;
-          const fy = (y + 0.5) / rows;
-          const d = fy - surf; // depth below the surface line (negative = air)
-          let v: number;
-          let ch: string;
+        // Column of stable randomness for spray/among cells, scrolled by current.
+        const src = (((x - drift) % cols) + cols) % cols;
 
-          if (d < -SPRAY_BAND) {
-            continue; // air, well above the surface
-          } else if (d < 0) {
-            // Spray just above the surface — sparse dots, denser over crests
-            if (seedRand[i] >= 0.12 + 0.5 * crest) continue;
-            v = 0.16 + 0.14 * crest;
-            ch = "·";
-          } else {
-            // Water: brighter/denser with depth (E4)
-            v = 0.28 + d * 1.7;
-            if (rippleGain > 0) {
-              const dx = x * CELL_W - ripple.x,
-                dy = y * CELL_H - ripple.y;
-              v += 0.6 * rippleGain * Math.exp(-(dx * dx + dy * dy) / 900); // (E10)
-            }
-            v = Math.min(1, Math.max(0, v));
-            if (v < 0.12) continue;
-            // The crest face (top band of water) and bright cells carry real
-            // Telugu letters — the "foam" of words riding the wave (E3).
-            ch = d < CREST_BAND || v > 0.82 ? seeds[i] : RAMP[(v * (RAMP.length - 1)) | 0];
+        // Spray dots riding above the crest.
+        for (let s = 1; s <= SPRAY_ROWS; s++) {
+          const sy = surfPx - s * CELL_H * 0.85;
+          if (sy < -CELL_H) break;
+          if (seedRand[s * cols + src] < 0.5 - s * 0.16) {
+            ctx!.globalAlpha = 0.2 - s * 0.06;
+            ctx!.fillText("·", cx, sy);
           }
+        }
 
+        // Water body: glyphs anchored to the surface, stacked to the bottom.
+        // Sub-pixel `py` → the mass slides smoothly as the surface bobs; letters
+        // ride the wave (identity keyed by depth band + drift, so they don't
+        // churn while bobbing) and flow sideways with the current.
+        let k = 0;
+        for (let py = surfPx; py < H + CELL_H * 0.5; py += CELL_H, k++) {
+          const df = (py - surfPx) / Math.max(1, H - surfPx); // 0 surface → 1 floor
+          let v = k === 0 ? 0.92 : 0.35 + 0.62 * df; // crest foam brightest
+          v = Math.min(1, Math.max(0, v));
+          if (v < 0.1) continue;
+          const seedIdx = ((k % bands) + bands) % bands * cols + src;
+          // Bright cells (crest + deep water) carry real Telugu letters; the
+          // shallow fade uses the density ramp (E3).
+          const ch = v > 0.78 ? seeds[seedIdx] : RAMP[(v * (RAMP.length - 1)) | 0];
           ctx!.globalAlpha = v * 0.85 + 0.05; // (E5)
-          ctx!.fillStyle = accent;
-          ctx!.fillText(ch, x * CELL_W + CELL_W / 2, y * CELL_H + CELL_H / 2);
+          ctx!.fillText(ch, cx, py);
         }
       }
       ctx!.globalAlpha = 1;
@@ -208,7 +224,7 @@
 
     // Console easter egg (E11)
     console.log(
-      "%cనమస్కారం 🌊 — built with Astro by Nemani Abhiram. Source: https://github.com/nemaniabhiram/blog",
+      "%cనమస్కారం 🌊 — built with Astro by Abhiram Nemani. Source: https://github.com/nemaniabhiram/blog",
       "color:#D97757;font-size:13px",
     );
   }

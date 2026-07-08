@@ -18,7 +18,7 @@ const iso = publishDate.toISOString();
 const ogImageUrl = ogImage ?? `/og-image/${post.id}.png`;
 ---
 
-<Base title={title} description={description} publishDate={publishDate} image={ogImageUrl} wide>
+<Base title={title} description={description} publishDate={publishDate} image={ogImageUrl} tags={tags} wide>
   <div class="post-grid">
     <div class="post-main">
       <header id="blog-hero" class="hero">
@@ -86,6 +86,19 @@ const ogImageUrl = ogImage ?? `/og-image/${post.id}.png`;
   .post-grid > :global(.toc) {
     grid-column: 3;
     justify-self: start;
+  }
+
+  /* Below the TOC breakpoint, collapse to a single full-width column so the
+     article isn't narrowed by the (now empty) gutter columns' gaps. */
+  @media (max-width: 1023px) {
+    .post-grid {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+    }
+
+    .post-main {
+      grid-column: 1;
+    }
   }
 
   .hero {

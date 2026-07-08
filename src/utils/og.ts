@@ -67,3 +67,15 @@ export async function renderOgImage({ title, date }: OgOptions): Promise<Buffer>
   const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } });
   return Buffer.from(resvg.render().asPng());
 }
+
+/** 180×180 apple-touch-icon: the "#" monogram on the cream surface (§13). */
+export async function renderAppleIcon(): Promise<Buffer> {
+  const markup = html`
+    <div style="display:flex;align-items:center;justify-content:center;width:180px;height:180px;background:#F0EEE6;font-family:'JetBrains Mono';font-weight:700;font-size:112px;color:#C15F3C;">
+      #
+    </div>
+  `;
+  const svg = await satori(markup, { width: 180, height: 180, fonts });
+  const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 180 } });
+  return Buffer.from(resvg.render().asPng());
+}

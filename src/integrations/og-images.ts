@@ -1,7 +1,7 @@
 import type { AstroIntegration } from "astro";
 import { readdirSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { parseFrontmatter } from "@astrojs/markdown-remark";
-import { renderOgImage } from "../utils/og";
+import { renderOgImage, renderAppleIcon } from "../utils/og";
 import { SITE } from "../data/constants";
 
 // OG images are generated in a build hook (not a route) because Astro 7's
@@ -58,7 +58,11 @@ export default function ogImages(): AstroIntegration {
 
         // Site-wide default used by non-post pages.
         writeFileSync(new URL("default.png", outDir), await renderOgImage({ title: SITE.title }));
-        logger.info(`Generated ${count + 1} OG image(s)`);
+
+        // apple-touch-icon at the site root (referenced from BaseHead).
+        writeFileSync(new URL("apple-touch-icon.png", dir), await renderAppleIcon());
+
+        logger.info(`Generated ${count + 1} OG image(s) + apple-touch-icon`);
       },
     },
   };

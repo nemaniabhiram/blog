@@ -190,7 +190,8 @@ a {
 }
 
 /* Reusable visually-hidden utility */
-.visually-hidden {
+.visually-hidden,
+.sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -303,6 +304,7 @@ a {
 .prose li {
   font-size: 0.9375rem;
   line-height: 1.75;
+  overflow-wrap: break-word; /* long URLs/tokens don't overflow on mobile */
 }
 
 /* Lists (accent markers) */
@@ -322,6 +324,23 @@ a {
 .prose :is(ul, ol) :is(ul, ol) {
   margin-top: var(--space-1);
   padding-left: 1.25rem;
+}
+
+/* GFM task lists (checkbox items) */
+.prose li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.25rem;
+}
+
+.prose input[type="checkbox"] {
+  accent-color: var(--color-accent);
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
+/* Strikethrough */
+.prose del {
+  color: var(--color-text-2);
 }
 
 /* Blockquote — display italic, accent bar (TRD §10) */
@@ -408,15 +427,17 @@ a {
   margin-inline: auto;
 }
 
-/* An <em> immediately after an image acts as a caption */
-.prose img + em,
-.prose p > img + em {
-  display: block;
+/* A paragraph of just italic text right after an image is a caption. Images
+   are unwrapped (rehype-unwrap-images), so the caption ends up in its own <p>. */
+.prose img + p:has(> em:only-child) {
   text-align: center;
   font-size: 0.8125rem;
   color: var(--color-text-3);
-  font-style: italic;
   margin-top: var(--space-2);
+}
+
+.prose img + p:has(> em:only-child) em {
+  font-style: italic;
 }
 
 /* Horizontal rule (TRD §10 — plain) */

@@ -1,8 +1,8 @@
 export const SITE = {
-  title: "Nemani Abhiram",
+  title: "Abhiram Nemani",
   description: "{{TODO:site-description — one sentence, ≤160 chars}}",
   url: "https://nemaniabhiram.dev",
-  author: "Nemani Abhiram",
+  author: "Abhiram Nemani",
   locale: "en-GB",
 };
 

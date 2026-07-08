@@ -8,11 +8,12 @@ interface Props {
   description?: string;
   image?: string;
   publishDate?: Date;
+  tags?: string[];
   /** Post pages widen <main> to fit the TOC rail (TRD §8.4). */
   wide?: boolean;
 }
 
-const { title, description, image, publishDate, wide = false } = Astro.props;
+const { title, description, image, publishDate, tags, wide = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -23,6 +24,7 @@ const { title, description, image, publishDate, wide = false } = Astro.props;
       description={description}
       image={image}
       publishDate={publishDate}
+      tags={tags}
     />
   </head>
   <body>

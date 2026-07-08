@@ -1,6 +1,6 @@
 # nemaniabhiram.dev
 
-A minimal, fast, zero-backend personal blog for **Nemani Abhiram**.
+A minimal, fast, zero-backend personal blog for **Abhiram Nemani**.
 Built with [Astro 7](https://astro.build), plain CSS, and self-hosted fonts —
 fully static, no database, no server runtime.
 
@@ -42,5 +42,5 @@ Cloudflare Pages (free tier): build command `pnpm build`, output `dist`,
 
 ## License
 
-Source © Nemani Abhiram. Fonts are OFL (Inter, JetBrains Mono, Noto Sans
+Source © Abhiram Nemani. Fonts are OFL (Inter, JetBrains Mono, Noto Sans
 Telugu, via Fontsource).
