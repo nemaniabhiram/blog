@@ -60,7 +60,7 @@ export default function ogImages(): AstroIntegration {
         writeFileSync(new URL("default.png", outDir), await renderOgImage({ title: SITE.title }));
 
         // apple-touch-icon at the site root (referenced from BaseHead).
-        writeFileSync(new URL("apple-touch-icon.png", dir), await renderAppleIcon());
+        writeFileSync(new URL("apple-touch-icon.png", dir), renderAppleIcon());
 
         logger.info(`Generated ${count + 1} OG image(s) + apple-touch-icon`);
       },

@@ -7,7 +7,7 @@ fully static, no database, no server runtime.
 ## Features
 
 - Markdown posts in `src/blog/` — `git push` to `master` publishes.
-- Warm, claude.ai-adjacent palette (cream light / charcoal dark, clay accent),
+- Warm monochrome palette (cream light / charcoal dark, ink/off-white accent),
   class-based dark mode with a no-flash theme toggle.
 - Mono-first UI (JetBrains Mono) with Inter for display headings.
 - Post pages with a sticky, scroll-spied table of contents and per-post Open

@@ -45,7 +45,7 @@ export async function renderOgImage({ title, date }: OgOptions): Promise<Buffer>
 
   const markup = html`
     <div style="display:flex;flex-direction:column;width:1200px;height:630px;background:#FAF9F5;font-family:'JetBrains Mono';">
-      <div style="display:flex;width:1200px;height:10px;background:#C15F3C;"></div>
+      <div style="display:flex;width:1200px;height:10px;background:#1F1D1A;"></div>
       <div style="display:flex;flex-direction:column;flex:1;justify-content:space-between;padding:64px;">
         <div style="display:flex;font-family:'Inter';font-weight:600;font-size:64px;line-height:1.15;color:#1F1D1A;max-width:1072px;">
           ${title}
@@ -56,7 +56,7 @@ export async function renderOgImage({ title, date }: OgOptions): Promise<Buffer>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;">
             <div style="display:flex;font-family:'JetBrains Mono';font-size:28px;color:#5E5A51;margin-bottom:${dateLabel ? "16px" : "0"};">${dateLabel}</div>
-            <div style="display:flex;font-family:'Noto Sans Telugu';font-size:32px;color:#C15F3C;opacity:0.4;letter-spacing:6px;">${glyphRow}</div>
+            <div style="display:flex;font-family:'Noto Sans Telugu';font-size:32px;color:#8A857A;opacity:0.55;letter-spacing:6px;">${glyphRow}</div>
           </div>
         </div>
       </div>
@@ -68,14 +68,19 @@ export async function renderOgImage({ title, date }: OgOptions): Promise<Buffer>
   return Buffer.from(resvg.render().asPng());
 }
 
-/** 180×180 apple-touch-icon: the "#" monogram on the cream surface (§13). */
-export async function renderAppleIcon(): Promise<Buffer> {
-  const markup = html`
-    <div style="display:flex;align-items:center;justify-content:center;width:180px;height:180px;background:#F0EEE6;font-family:'JetBrains Mono';font-weight:700;font-size:112px;color:#C15F3C;">
-      #
-    </div>
-  `;
-  const svg = await satori(markup, { width: 180, height: 180, fonts });
-  const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 180 } });
-  return Buffer.from(resvg.render().asPng());
+/** 180×180 apple-touch-icon: a pixel-art "#" on the always-light chip (§13). */
+export function renderAppleIcon(): Buffer {
+  // 5×7 bitmap "#": columns that are "on" per row.
+  const grid = [[1, 3], [1, 3], [0, 1, 2, 3, 4], [1, 3], [0, 1, 2, 3, 4], [1, 3], [1, 3]];
+  const P = 18,
+    OX = 45,
+    OY = 27; // 5·18=90 wide, 7·18=126 tall, centred in 180
+  let rects = "";
+  grid.forEach((row, r) => {
+    for (const c of row) rects += `<rect x="${OX + c * P}" y="${OY + r * P}" width="${P}" height="${P}"/>`;
+  });
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180" shape-rendering="crispEdges">` +
+    `<rect width="180" height="180" rx="40" fill="#F0EEE6"/><g fill="#1F1D1A">${rects}</g></svg>`;
+  return Buffer.from(new Resvg(svg).render().asPng());
 }

@@ -67,6 +67,8 @@ const jsonLd = isArticle
     const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const isDark = stored ? stored === "dark" : systemDark;
     root.classList.toggle("dark", isDark);
+    // Theme mode: auto (no stored value, the default) | light | dark
+    root.dataset.themeMode = stored || "auto";
     // Enable color/bg transitions only after first paint
     requestAnimationFrame(() => root.classList.add("theme-ready"));
     // Live-switch with the system when there is no manual override

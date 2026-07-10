@@ -29,12 +29,17 @@
   --color-text-3: #8a857a;
   --color-border: #e3dfd3;
   --color-border-2: #cfc9ba;
-  --color-accent: #c15f3c;
-  --color-accent-hover: #a34f31;
-  --color-accent-soft: rgba(193, 95, 60, 0.1);
-  --color-selection: rgba(193, 95, 60, 0.22);
+  /* Monochrome accent: high-contrast ink in light, off-white in dark. */
+  --color-accent: #1f1d1a;
+  --color-accent-hover: #4a463f;
+  --color-accent-soft: rgba(31, 29, 26, 0.08);
+  --color-selection: rgba(31, 29, 26, 0.15);
   --color-code-bg: #f0eee6;
   --color-inline-code-bg: #ece9df;
+  /* Logo chip is always light (does NOT flip with the theme) — not overridden
+     in .dark. Matches the reference: light chip, dark pixel-#. */
+  --chip-bg: #f0eee6;
+  --chip-fg: #1f1d1a;
   --shadow-raised: 0 1px 2px rgba(31, 29, 26, 0.05), 0 8px 24px rgba(31, 29, 26, 0.08);
 
   /* Spacing, radii, sizing (TRD §5.5) */
@@ -68,10 +73,10 @@
   --color-text-3: #847f73;
   --color-border: rgba(237, 234, 227, 0.1);
   --color-border-2: rgba(237, 234, 227, 0.2);
-  --color-accent: #d97757;
-  --color-accent-hover: #e4906f;
-  --color-accent-soft: rgba(217, 119, 87, 0.14);
-  --color-selection: rgba(217, 119, 87, 0.3);
+  --color-accent: #edeae3;
+  --color-accent-hover: #f8f6f1;
+  --color-accent-soft: rgba(237, 234, 227, 0.1);
+  --color-selection: rgba(237, 234, 227, 0.22);
   --color-code-bg: #262521;
   --color-inline-code-bg: #2d2b26;
   --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -119,6 +124,25 @@ body {
 .theme-ready body,
 .theme-ready {
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Circle-reveal theme switch (View Transitions). Disable the default cross-fade
+   so the JS clip-path drives the reveal; suppress the .theme-ready colour
+   transition during it so the captured snapshot doesn't double-animate. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+::view-transition-old(root) {
+  z-index: 0;
+}
+.vt-active,
+.vt-active body {
+  transition: none !important;
 }
 
 ::selection {
